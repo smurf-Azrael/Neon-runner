@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Runner 2</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+  
+    <script src="https://cdn.jsdelivr.net/gh/kripken/ammo.js@HEAD/builds/ammo.wasm.js"></script>
+  </head>
+  <body>
+    <div class="loading-screen screen">
+      <h2>Loading</h2>
+      <div class="spinner"></div>
+    </div>
+
+    <div class="main-screen screen hidden">
+      <h2 class="title">Neon Runner 2</h2>
+      <div class="buttons">
+        <button class="play" style="--hover-color: var(--blue-color);" tabindex="-1"><span><p>Play</p></span></button>
+        <button class="options" style="--hover-color: var(--pink-color);" tabindex="-1"><span><p>Options</p></span></button>
+      </div>
+    </div>
+
+    <div class="game-screen screen hidden"></div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
