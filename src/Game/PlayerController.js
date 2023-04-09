@@ -19,12 +19,12 @@ class PlayerController {
             new THREE.BoxGeometry(2, 2, 2),
             new THREE.MeshBasicMaterial({ color: 0x00ccff })
         );
-        this.player_mesh.position.set(3, 3, 3);
+        this.player_mesh.position.set(0, 5, 0);
         
         this._camera_controller = new CameraController(this._camera);
         this._kinematic_character_controller = new KinematicCharacterController(this.player_mesh.position, this.player_mesh.quaternion);
 
-        this._physics.world.addCollisionObject(this._kinematic_character_controller.body);
+        this._physics.world.addCollisionObject(this._kinematic_character_controller.body, 2, -1);
         this._physics.world.addAction(this._kinematic_character_controller.controller);
 
         this._keys = {};
@@ -92,15 +92,21 @@ class PlayerController {
             if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
             if (this._keys["Space"]) this._kinematic_character_controller.Jump();
         }
-
+        
         /* Move Player in Direction and Get New Transform */
         const newTransform = this._kinematic_character_controller.Move(direction);
 
         /* Update Camera and Player Position */
         const newPos = newTransform.getOrigin();
         const newPos3 = new THREE.Vector3(newPos.x(), newPos.y(), newPos.z());
+        
         this.player_mesh.position.copy(newPos3);
         this._camera.position.copy(newPos3);
+        
+        // this._camera.position.set(newPos3.x, newPos3.y + 5, newPos3.z - 5);
+
+        // Get Collisions
+        // this._kinematic_character_controller.GetCollidingObjects().forEach(o => console.log(o.kB));
     }
 }
 

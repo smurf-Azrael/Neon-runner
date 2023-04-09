@@ -18,6 +18,19 @@ class RigidBody {
         this.info = new Ammo.btRigidBodyConstructionInfo(mass, this.motion_state, this.shape, this.inertia);
         this.body = new Ammo.btRigidBody(this.info);
 
+        // this.SetRestitution(1);
+        // this.SetFriction(1);
+
+        // const new_gravity = new Ammo.btVector3(0, 0, -9.81);
+
+        // const impulse = new Ammo.btVector3(
+        //     -new_gravity.x() * mass,
+        //     -new_gravity.y() * mass,
+        //     -new_gravity.z() * mass
+        // );
+
+        // this.body.applyImpulse(impulse, new Ammo.btVector3());
+
         Ammo.destroy(bt_size);
     }
 

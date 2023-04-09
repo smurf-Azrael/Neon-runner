@@ -6,7 +6,7 @@ const flags = {
     CF_CHARACTER_OBJECT: 16
 };
 
-const GRAVITY = 35;
+const GRAVITY = 25;
 
 class KinematicCharacterController {
     constructor(pos, quat) {
@@ -31,17 +31,19 @@ class KinematicCharacterController {
         this.body = new Ammo.btPairCachingGhostObject();
         this.body.setWorldTransform(this.transform);
         this.body.setCollisionShape(this.shape);
-        this.body.setCollisionFlags(flags.CF_CHARACTER_OBJECT);
+        this.body.setCollisionFlags(this.body.getCollisionFlags() | -1);
         this.body.activate(true);
 
-        this.controller = new Ammo.btKinematicCharacterController(this.body, this.shape, 0.35, 1);
+        this.controller = new Ammo.btKinematicCharacterController(this.body, this.shape, 0, 1);
         this.controller.setUseGhostSweepTest(true);
         this.controller.setUpInterpolate();
         this.controller.setGravity(GRAVITY);
-        this.controller.setMaxSlope(Math.PI / 3);
+        // this.controller.setMaxSlope(Math.PI / 2);
         this.controller.canJump(true);
         this.controller.setJumpSpeed(GRAVITY / 3);
         this.controller.setMaxJumpHeight(100);
+
+        console.log(this);
     }
 
     Move(direction) {
@@ -82,16 +84,17 @@ class KinematicCharacterController {
 
     GetCollidingObjects() {
         const contacts = this.body.getNumOverlappingObjects();
+
+        if (contacts < 0) return;
+
         const contactObjects = [];
-        
-        if (contacts > 0) {
-            for (let i = 0; i < contacts; i++) {
-                const contactObject = this.body.getOverlappingObject(i);
 
-                if (!contactObject) continue;
+        for (let i = 0; i < contacts; i++) {
+            const contactObject = this.body.getOverlappingObject(i);
 
-                contactObjects.push(contactObject);
-            }
+            if (!contactObject) continue;
+
+            contactObjects.push(contactObject);
         }
 
         return contactObjects;
