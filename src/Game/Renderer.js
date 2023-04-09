@@ -36,6 +36,7 @@ class Renderer {
 
     Resize() {
         this.instance.setSize(this.sizes.width, this.sizes.height);
+        this.instance.setPixelRatio(window.devicePixelRatio);
     }
 
     Update() {

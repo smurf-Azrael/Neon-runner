@@ -5,8 +5,15 @@ class Physics {
         this.broadphase = new Ammo.btDbvtBroadphase();
         this.solver = new Ammo.btSequentialImpulseConstraintSolver();
         this.world = new Ammo.btDiscreteDynamicsWorld(this.dispatcher, this.broadphase, this.solver, this.collision_configuration);
-        this.world.setGravity(new Ammo.btVector3(0, -9.81, 0));
+        this.world.setGravity(new Ammo.btVector3(0, -9.8, 0));
         this.world.getBroadphase().getOverlappingPairCache().setInternalGhostPairCallback(new Ammo.btGhostPairCallback());
+
+        const res = [];
+        Object.keys(Ammo).forEach(key => {
+            if (/^bt/.test(key) && /world/i.test(key)) res.push({key, value: Ammo[key]});
+        });
+
+        console.log(res);
     }
 
     Update(t) {

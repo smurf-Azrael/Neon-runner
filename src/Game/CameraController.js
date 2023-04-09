@@ -63,7 +63,8 @@ class CameraController {
     OnMouseMove(e) {
         if (document.pointerLockElement == document.body) {
             this._camera.rotation.y -= e.movementX / 500;
-            this._camera.rotation.x -= e.movementY / 500;
+
+            this._camera.rotation.x = Math.max(Math.min(this._camera.rotation.x - e.movementY / 500, 1.53), -1.55);
         }
     }
 }
