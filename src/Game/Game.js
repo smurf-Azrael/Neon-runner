@@ -62,12 +62,12 @@ class Game {
         window.requestAnimationFrame(() => this.Update());
 
         const deltaT = this._clock.getDelta();
-        // const elapsedT = this._clock.getElapsedTime();
+        const elapsedT = this._clock.getElapsedTime();
 
         this._physics.Update(deltaT);
         this._renderer.Update();
         this._player_controller.Update(deltaT);
-        this._world.Update(deltaT);
+        this._world.Update(elapsedT);
 
         // this._camera.instance.position.z += deltaT * 10.0;
     }
