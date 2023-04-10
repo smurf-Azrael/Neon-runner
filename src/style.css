@@ -31,6 +31,8 @@ button {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 /******************/
@@ -110,4 +112,11 @@ button {
     }
 
     .title { font-size: 5.5rem; }
+}
+
+.game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1 !important;
 }

@@ -20,6 +20,8 @@ class Obstacle {
         this.rigid_body = new RigidBody();
         this.rigid_body.CreateBox(0, this.mesh.position, this.mesh.quaternion, size);
 
+        this.mesh.userData.physics_body = this.rigid_body.body;
+
         return { mesh: this.mesh, rigid_body: this.rigid_body };
     }
 
