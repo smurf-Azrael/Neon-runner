@@ -97,8 +97,36 @@ button {
     transform: scale(1.025);
 }
 
+.game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1 !important;
+    user-select: none;
+}
+
+.game-over {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.65);
+    justify-content: space-between;
+    user-select: none;
+}
+
+.game-over h2 {
+    font-size: 4rem;
+    margin: 5rem 0;
+}
+
+.game-over .buttons {
+    margin: 5rem 0;
+    width: min(80%, 800px);
+    display: flex;
+    gap: 5rem;
+}
+
 @media (min-width: 760px) {
     .title { font-size: 4.5rem; }
+    .game-over h2 { font-size: 6rem; }
 }
 
 @media (min-width: 1000px) {
@@ -112,11 +140,6 @@ button {
     }
 
     .title { font-size: 5.5rem; }
-}
 
-.game-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1 !important;
+    .game-over h2 { font-size: 7rem; }
 }

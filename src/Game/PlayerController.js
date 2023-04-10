@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import DOMElements from '../DOMElements.js';
 
 import CameraController from "./CameraController.js"
 import KinematicCharacterController from "./KinematicCharacterController.js"
@@ -78,18 +79,19 @@ class PlayerController {
 
         /* Check if Player has Lost */
         if (pos.y() <= -40) {
-            this._kinematic_character_controller.Teleport(new THREE.Vector3(0, 5, 0));
+            DOMElements.screens.gameOverScreen.classList.remove('hidden');
+            document.exitPointerLock();
         }
 
         /* Go Forward Only */
-        // direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+        direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
 
         if (document.pointerLockElement == document.body) {
             /* Free Roam Controls */
-            if (this._keys["KeyW"]) direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["KeyS"]) direction.sub(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["KeyA"]) direction.sub(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            // if (this._keys["KeyW"]) direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            // if (this._keys["KeyS"]) direction.sub(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            // if (this._keys["KeyA"]) direction.sub(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            // if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
             if (this._keys["Space"]) this._kinematic_character_controller.Jump();
         }
         
