@@ -3,6 +3,7 @@ import { Line, Vector3 } from 'three';
 
 import RigidBody from './Rigidbody.js';
 import Obstacle from './Obstacle.js';
+import DOMElements from '../DOMElements.js';
 
 const VERTEX_SHADER = `
 varying vec3 v_pos;
@@ -200,29 +201,20 @@ class World {
     }
 
     Update(t, e, kinematic_character_controller_body) {
-        // this.rb_box.motion_state.getWorldTransform(this.tmp_transform);
-        // const pos = this.tmp_transform.getOrigin();
-        // const quat = this.tmp_transform.getRotation();
-        // const pos3 = new THREE.Vector3(pos.x(), pos.y(), pos.z());
-        // const quat3 = new THREE.Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
-
-        // this.box.position.copy(pos3);
-        // this.box.quaternion.copy(quat3);
-
         for (let i = 0; i < this._boxes.length; i++) {
             this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
             this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
         }
 
         for (let i = 0; i < this._obstacles.length; i++) {
-            // this.cb_contact_pair_result.hasContact = false;
-            // this._physics.world.contactPairTest(kinematic_character_controller_body, this._obstacles[i].rigid_body.body, this.cb_contact_pair_result);
+            this.cb_contact_pair_result.hasContact = false;
+            this._physics.world.contactPairTest(kinematic_character_controller_body, this._obstacles[i].rigid_body.body, this.cb_contact_pair_result);
 
-            // if (this.cb_contact_pair_result.hasContact) {
-            //     console.log(this._obstacles[i].rigid_body);
-            //     // GAME OVER
-            //     return;
-            // }
+            if (this.cb_contact_pair_result.hasContact) {
+                DOMElements.screens.gameOverScreen.classList.remove('hidden');
+                document.exitPointerLock();
+                return;
+            }
 
             this._obstacles[i].Update(e);
         }

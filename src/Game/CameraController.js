@@ -17,7 +17,7 @@ class CameraController {
 
         document.addEventListener("touchstart", e => this.OnTouchStart(e));
         document.addEventListener("touchmove", e => this.OnTouchMove(e));
-        document.addEventListener("click", () => this.OnMouseDown());
+        this.sizes.dom_element.addEventListener("click", () => this.OnMouseDown());
         document.addEventListener("mousemove", e => this.OnMouseMove(e));
     }
   

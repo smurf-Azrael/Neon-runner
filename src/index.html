@@ -18,12 +18,21 @@
     <div class="main-screen screen hidden">
       <h2 class="title">Neon Runner 2</h2>
       <div class="buttons">
-        <button class="play" style="--hover-color: var(--blue-color);" tabindex="-1"><span><p>Play</p></span></button>
-        <button class="options" style="--hover-color: var(--pink-color);" tabindex="-1"><span><p>Options</p></span></button>
+        <button class="play" style="--hover-color: var(--blue-color);" tabindex="-1">Play</button>
+        <button class="options" style="--hover-color: var(--pink-color);" tabindex="-1">Options</button>
       </div>
     </div>
 
-    <div class="game-screen screen"></div>
+    <div class="game-screen screen">
+    </div>
+
+    <div class="game-over screen hidden">
+      <h2>Game Over</h2>
+      <div class="buttons">
+        <button class="retry" style="--hover-color: var(--blue-color);" tabindex="-1">Retry</button>
+        <button class="exit" style="--hover-color: var(--pink-color);" tabindex="-1">Exit</button>  
+      </div>
+    </div>
 
     <script type="module" src="/main.js"></script>
   </body>
