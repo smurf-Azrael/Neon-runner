@@ -42,8 +42,6 @@ class KinematicCharacterController {
         this.controller.canJump(true);
         this.controller.setJumpSpeed(GRAVITY / 3);
         this.controller.setMaxJumpHeight(100);
-
-        console.log(this);
     }
 
     Move(direction) {

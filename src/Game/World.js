@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { Line, Vector3 } from 'three';
 
 import RigidBody from './Rigidbody.js';
+import Obstacle from './Obstacle.js';
 
 const VERTEX_SHADER = `
 varying vec3 v_pos;
@@ -46,10 +47,13 @@ class World {
         }
         this._scene = scene;
 
+        this._obstacle_spacing = 20;
+
         this.CreatePlatforms();
         this.CreateBoxes();
         this.CreateLasers();
-        this.CreateDummyObstacles();
+        this.CreateObstacles();
+        // this.CreateDummyObstacles();
     }
 
     CreateStaticBody(size, pos = new THREE.Vector3(), quat = new THREE.Quaternion(), uniforms) {
@@ -79,32 +83,21 @@ class World {
         const rigid_body = new RigidBody()
         rigid_body.CreateBox(0, pos, quat, size);
         this._physics.world.addRigidBody(rigid_body.body, 1, -1);
-        rigid_body.body.needUpdate = true;
 
         return { mesh, rigid_body };
     }
 
     CreatePlatforms() {
-        const spawn_platform = this.CreateStaticBody(new THREE.Vector3(10, 2, 10), new THREE.Vector3(0, -1, 0));
+        const spawn_platform = this.CreateStaticBody(new THREE.Vector3(10, 0.1, 10), new THREE.Vector3(0, -0.05, 0));
         const spawn_platform_left_wall = this.CreateStaticBody(new THREE.Vector3(0.1, 10, 10), new THREE.Vector3(5, 4.9, 0));
         const spawn_platform_right_wall = this.CreateStaticBody(new THREE.Vector3(0.1, 10, 10), new THREE.Vector3(-5, 4.9, 0));
         const spawn_platform_back_wall = this.CreateStaticBody(new THREE.Vector3(10, 10, 0.1), new THREE.Vector3(0, 4.9, -5));
         const spawn_platform_top_wall = this.CreateStaticBody(new THREE.Vector3(10, 0.1, 10), new THREE.Vector3(0, 9.9, 0));
 
-        // const platform = this.CreateStaticBody(new THREE.Vector3(5, 10, 1000), new THREE.Vector3(0, -5, 504.9));
         for (let i = 0; i < 100; i++) {
-            const platform = this.CreateStaticBody(new THREE.Vector3(5, 2, 20), new THREE.Vector3(0, -1, i * 20 + 15.1 + i));
-            if (i % 2 == 0) platform.mesh.material.uniforms.u_color.value = PINK_COLOR;
+            const platform = this.CreateStaticBody(new THREE.Vector3(5, 2, 20), new THREE.Vector3(0, -1, (i * 20) + 16 + i));
+            if (i % 2 == 1) platform.mesh.material.uniforms.u_color.value = PINK_COLOR;
         }
-        // const left_wall = this.CreateStaticBody(new THREE.Vector3(0.1, 100, 200), new THREE.Vector3(50, 0, 54.9));
-        // const right_wall = this.CreateStaticBody(new THREE.Vector3(0.1, 100, 200), new THREE.Vector3(-50, 0, 54.9));
-        // const bottom_wall = this.CreateStaticBody(new THREE.Vector3(102, 0.1, 200), new THREE.Vector3(0, -50, 54.9));
-        // const top_wall = this.CreateStaticBody(new THREE.Vector3(102, 0.1, 200), new THREE.Vector3(0, 50, 54.9));
-
-        // left_wall.mesh.material.uniforms.u_thickness.value = 1;
-        // right_wall.mesh.material.uniforms.u_thickness.value = 1;
-        // bottom_wall.mesh.material.uniforms.u_thickness.value = 1;
-        // top_wall.mesh.material.uniforms.u_thickness.value = 1;
     }
 
     CreateBoxes() {
@@ -141,8 +134,8 @@ class World {
         
         this._lasers = Array(1000).fill(null).map((e, i) => {
             const points = [
-                new THREE.Vector3(-50, -50, i * 25),
-                new THREE.Vector3(0, 50, i * 25),
+                new THREE.Vector3(-50, -50, i * 25).multiplyScalar(1),
+                new THREE.Vector3(0, 50, i * 25).multiplyScalar(1),
                 new THREE.Vector3(50, -50, i * 25)
             ];
 
@@ -155,6 +148,20 @@ class World {
             this._scene.add(mesh);
 
             this._rotation += 1;
+        });
+    }
+
+    CreateObstacles() {
+        this._obstacles = Array(10).fill(null).map((e, i) => {
+            const obstacle = new Obstacle();
+            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 15.1));
+
+            this._scene.add(obstacle.mesh);
+
+            this._physics.world.addRigidBody(obstacle.rigid_body.body, 1, -1);
+            obstacle.rigid_body.body.needUpdate = true;
+
+            return obstacle;
         });
     }
 
@@ -173,24 +180,29 @@ class World {
         this.rb_box.SetRestitution(0.25);
         this.rb_box.SetFriction(1);
         this.rb_box.SetRollingFriction(5);
+
         this._physics.world.addRigidBody(this.rb_box.body);
 
         this.tmp_transform = new Ammo.btTransform();
     }
 
-    Update(t) {
-        this.rb_box.motion_state.getWorldTransform(this.tmp_transform);
-        const pos = this.tmp_transform.getOrigin();
-        const quat = this.tmp_transform.getRotation();
-        const pos3 = new THREE.Vector3(pos.x(), pos.y(), pos.z());
-        const quat3 = new THREE.Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
+    Update(e) {
+        // this.rb_box.motion_state.getWorldTransform(this.tmp_transform);
+        // const pos = this.tmp_transform.getOrigin();
+        // const quat = this.tmp_transform.getRotation();
+        // const pos3 = new THREE.Vector3(pos.x(), pos.y(), pos.z());
+        // const quat3 = new THREE.Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 
-        this.box.position.copy(pos3);
-        this.box.quaternion.copy(quat3);
+        // this.box.position.copy(pos3);
+        // this.box.quaternion.copy(quat3);
 
-        for (let i = 0; i < this._boxes.length; i++) {
-            this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
-            this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
+        // for (let i = 0; i < this._boxes.length; i++) {
+        //     this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
+        //     this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
+        // }
+
+        for (let i = 0; i < this._obstacles.length; i++) {
+            this._obstacles[i].Update(e);
         }
     }
 }
