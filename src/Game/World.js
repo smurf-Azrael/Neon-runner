@@ -49,6 +49,7 @@ class World {
 
         this._obstacle_spacing = 20;
 
+        this.SetupContactPairResultCallback();
         this.CreatePlatforms();
         this.CreateBoxes();
         this.CreateLasers();
@@ -154,11 +155,11 @@ class World {
     CreateObstacles() {
         this._obstacles = Array(10).fill(null).map((e, i) => {
             const obstacle = new Obstacle();
-            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 15.1));
+            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 16 + i));
 
             this._scene.add(obstacle.mesh);
 
-            this._physics.world.addRigidBody(obstacle.rigid_body.body, 1, -1);
+            this._physics.world.addRigidBody(obstacle.rigid_body.body);
             obstacle.rigid_body.body.needUpdate = true;
 
             return obstacle;
@@ -186,7 +187,19 @@ class World {
         this.tmp_transform = new Ammo.btTransform();
     }
 
-    Update(e) {
+    SetupContactPairResultCallback() {
+        this.cb_contact_pair_result = new Ammo.ConcreteContactResultCallback();
+        this.cb_contact_pair_result.hasContact = false;
+        this.cb_contact_pair_result.addSingleResult = function(cp, colObj0Wrap, partId0, index0, colObj1Wrap, partId1, index1) {
+            const contact_point = Ammo.wrapPointer(cp, Ammo.btManifoldPoint);
+            
+            if (contact_point.getDistance() > 0.05) return;
+
+            this.hasContact = true;
+        }
+    }
+
+    Update(t, e, kinematic_character_controller_body) {
         // this.rb_box.motion_state.getWorldTransform(this.tmp_transform);
         // const pos = this.tmp_transform.getOrigin();
         // const quat = this.tmp_transform.getRotation();
@@ -196,12 +209,21 @@ class World {
         // this.box.position.copy(pos3);
         // this.box.quaternion.copy(quat3);
 
-        // for (let i = 0; i < this._boxes.length; i++) {
-        //     this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
-        //     this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
-        // }
+        for (let i = 0; i < this._boxes.length; i++) {
+            this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
+            this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
+        }
 
         for (let i = 0; i < this._obstacles.length; i++) {
+            // this.cb_contact_pair_result.hasContact = false;
+            // this._physics.world.contactPairTest(kinematic_character_controller_body, this._obstacles[i].rigid_body.body, this.cb_contact_pair_result);
+
+            // if (this.cb_contact_pair_result.hasContact) {
+            //     console.log(this._obstacles[i].rigid_body);
+            //     // GAME OVER
+            //     return;
+            // }
+
             this._obstacles[i].Update(e);
         }
     }

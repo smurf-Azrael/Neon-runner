@@ -6,6 +6,7 @@ import './style.css'
 
 const switch_screen = (screen) => {
     for (const screen in DOMElements.screens) DOMElements.screens[screen].classList.add('hidden');
+    DOMElements.screens.gameScreen.classList.remove('hidden');
     screen.classList.remove('hidden');
 }
 
@@ -21,10 +22,10 @@ new Loader().LoadAll(Assets.textures, res => {
     }).catch(console.error);
 })
 
-// let GAME;
-// DOMElements.buttons.playButton.addEventListener('click', () => {
-//     if (!GAME) GAME = new Game();
-//     else console.log('Restart game');
+let GAME;
+DOMElements.buttons.playButton.addEventListener('click', () => {
+    switch_screen(DOMElements.screens.gameScreen);
 
-//     switch_screen(DOMElements.screens.gameScreen);
-// });
+    if (!GAME) GAME = new Game();
+    else console.log('Restart game');
+});

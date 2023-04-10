@@ -67,8 +67,9 @@ class Game {
         this._physics.Update(deltaT);
         this._renderer.Update();
         this._player_controller.Update(deltaT);
-        this._world.Update(elapsedT);
+        this._world.Update(deltaT, elapsedT, this._player_controller._kinematic_character_controller.body);
 
+        // this._world.Update(deltaT, elapsedT);
         // this._camera.instance.position.z += deltaT * 10.0;
     }
 }
