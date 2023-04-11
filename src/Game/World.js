@@ -1,9 +1,9 @@
 import * as THREE from 'three'
 import { Line, Vector3 } from 'three';
 
+import Game from './Game.js';
 import RigidBody from './Rigidbody.js';
 import Obstacle from './Obstacle.js';
-import DOMElements from '../DOMElements.js';
 
 const VERTEX_SHADER = `
 varying vec3 v_pos;
@@ -55,7 +55,6 @@ class World {
         this.CreateBoxes();
         this.CreateLasers();
         this.CreateObstacles();
-        // this.CreateDummyObstacles();
     }
 
     CreateStaticBody(size, pos = new THREE.Vector3(), quat = new THREE.Quaternion(), uniforms) {
@@ -71,7 +70,6 @@ class World {
                 uniforms: uniforms === undefined ? {
                     u_size: { value: size.clone().multiplyScalar(0.5) },
                     u_color: { value: new THREE.Color(0x00ccff) },
-                    // u_color: { value: BLUE_COLOR },
                     u_thickness: { value: 0.1 },
                     u_smoothness: { value: 0.01 }
                 } : uniforms,
@@ -96,14 +94,14 @@ class World {
         const spawn_platform_back_wall = this.CreateStaticBody(new THREE.Vector3(10, 10, 0.1), new THREE.Vector3(0, 4.9, -5));
         const spawn_platform_top_wall = this.CreateStaticBody(new THREE.Vector3(10, 0.1, 10), new THREE.Vector3(0, 9.9, 0));
 
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 50; i++) {
             const platform = this.CreateStaticBody(new THREE.Vector3(5, 2, 20), new THREE.Vector3(0, -1, (i * 20) + 16 + i));
             if (i % 2 == 1) platform.mesh.material.uniforms.u_color.value = PINK_COLOR;
         }
     }
 
     CreateBoxes() {
-        this._boxes = Array(1000).fill(null).map((e, i) => {
+        this._boxes = Array(1000).fill().map((e, i) => {
             const v = new Vector3(
                 (Math.random() * 2 - 1) * 30,
                 Math.random() * 50 - 12.75,
@@ -134,7 +132,7 @@ class World {
     CreateLasers() {
         this._rotation = 0;
         
-        this._lasers = Array(1000).fill(null).map((e, i) => {
+        this._lasers = Array(1000).fill().map((e, i) => {
             const points = [
                 new THREE.Vector3(-50, -50, i * 25).multiplyScalar(1),
                 new THREE.Vector3(0, 50, i * 25).multiplyScalar(1),
@@ -154,38 +152,16 @@ class World {
     }
 
     CreateObstacles() {
-        this._obstacles = Array(10).fill(null).map((e, i) => {
+        this._obstacles = Array(10).fill().map((e, i) => {
             const obstacle = new Obstacle();
-            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 16 + i));
+            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 16 + i), i % 2 == 0 ? 1 : -1);
 
             this._scene.add(obstacle.mesh);
 
             this._physics.world.addRigidBody(obstacle.rigid_body.body);
-            obstacle.rigid_body.body.needUpdate = true;
 
             return obstacle;
         });
-    }
-
-    CreateDummyObstacles() {
-        const box_size = new THREE.Vector3(1, 1, 1);
-
-        this.box = new THREE.Mesh(
-            new THREE.BoxGeometry(box_size.x, box_size.y, box_size.z),
-            new THREE.MeshBasicMaterial({ color: 0xfff000 })
-        );
-        this.box.position.set(0, 5, 0);
-        this._scene.add(this.box);
-
-        this.rb_box = new RigidBody();
-        this.rb_box.CreateBox(1, this.box.position, this.box.quaternion, box_size);
-        this.rb_box.SetRestitution(0.25);
-        this.rb_box.SetFriction(1);
-        this.rb_box.SetRollingFriction(5);
-
-        this._physics.world.addRigidBody(this.rb_box.body);
-
-        this.tmp_transform = new Ammo.btTransform();
     }
 
     SetupContactPairResultCallback() {
@@ -207,13 +183,14 @@ class World {
         }
 
         for (let i = 0; i < this._obstacles.length; i++) {
-            this.cb_contact_pair_result.hasContact = false;
-            this._physics.world.contactPairTest(kinematic_character_controller_body, this._obstacles[i].rigid_body.body, this.cb_contact_pair_result);
+            if (kinematic_character_controller_body) {
+                this.cb_contact_pair_result.hasContact = false;
+                this._physics.world.contactPairTest(kinematic_character_controller_body, this._obstacles[i].rigid_body.body, this.cb_contact_pair_result);
 
-            if (this.cb_contact_pair_result.hasContact) {
-                DOMElements.screens.gameOverScreen.classList.remove('hidden');
-                document.exitPointerLock();
-                return;
+                if (this.cb_contact_pair_result.hasContact) {
+                    Game.Lose();
+                    return;
+                }
             }
 
             this._obstacles[i].Update(e);

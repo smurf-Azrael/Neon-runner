@@ -8,5 +8,7 @@ export default Object.freeze({
     buttons: {
         playButton: document.querySelector('.play'),
         optionsButton: document.querySelector('.options'),
+        retryButton: document.querySelector('.retry'),
+        exitButton: document.querySelector('.exit'),
     }
 });

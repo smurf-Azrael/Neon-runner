@@ -1,31 +1,43 @@
-import DOMElements from './DOMElements.js'
-import Loader from './Game/Loader.js'
 import Assets from './Game/Assets.js'
+import DOMElements from './DOMElements.js'
 import Game from './Game/Game.js'
+import Loader from './Game/Loader.js'
 import './style.css'
 
 const switch_screen = (screen) => {
     for (const screen in DOMElements.screens) DOMElements.screens[screen].classList.add('hidden');
-    DOMElements.screens.gameScreen.classList.remove('hidden');
+    DOMElements.screens.gameScreen.classList.remove('hidden'); // Prevent game screen from being hidden
     screen.classList.remove('hidden');
 }
+
+let GAME;
 
 new Loader().LoadAll(Assets.textures, res => {
     console.log(`Finished loading resources.`);
 
-    Ammo().then(lib => {
-        Ammo = lib;
-        console.log(`Finished loading Ammo JS.`);
-        // switch_screen(DOMElements.screens.mainScreen);
-        switch_screen(DOMElements.screens.gameScreen); // DEV
-        new Game() // DEV
-    }).catch(console.error);
+    Ammo()
+        .then(lib => {
+            Ammo = lib;
+            console.log(`Finished loading Ammo JS.`);
+
+            // switch_screen(DOMElements.screens.mainScreen);
+
+            switch_screen(DOMElements.screens.gameScreen); // DEV
+            GAME = new Game(); GAME.InitializePlayerControls(); // DEV
+        })
+        .catch(console.error);
 })
 
-let GAME;
 DOMElements.buttons.playButton.addEventListener('click', () => {
     switch_screen(DOMElements.screens.gameScreen);
 
     if (!GAME) GAME = new Game();
     else console.log('Restart game');
+});
+
+DOMElements.buttons.retryButton.addEventListener('click', () => {
+    console.log(GAME);
+    if (!GAME) return;
+
+    GAME.Restart();
 });
