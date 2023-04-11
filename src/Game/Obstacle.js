@@ -30,7 +30,6 @@ class Obstacle {
         scene.remove(this.mesh);
 
         Ammo.destroy(this._quaternionBT);
-        // console.log(this.rigid_body.body);
         physics_world.removeCollisionObject(this.rigid_body.body);
         this.rigid_body.Destroy();
     }
