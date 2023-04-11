@@ -1,4 +1,5 @@
 import Sizes from "./utils/Sizes.js";
+import DOMElements from "../DOMElements.js";
 
 class CameraController {
     constructor(camera) {
@@ -17,7 +18,7 @@ class CameraController {
 
         document.addEventListener("touchstart", e => this.OnTouchStart(e));
         document.addEventListener("touchmove", e => this.OnTouchMove(e));
-        this.sizes.dom_element.addEventListener("click", () => this.OnMouseDown());
+        DOMElements.screens.gameStartScreen.addEventListener("click", () => this.OnMouseDown());
         document.addEventListener("mousemove", e => this.OnMouseMove(e));
     }
   

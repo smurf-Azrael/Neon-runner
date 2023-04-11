@@ -48,7 +48,7 @@ class World {
         }
         this._scene = scene;
 
-        this._obstacle_spacing = 20;
+        this._obstacle_spacing = 5;
 
         this.SetupContactPairResultCallback();
         this.CreatePlatforms();
@@ -152,9 +152,9 @@ class World {
     }
 
     CreateObstacles() {
-        this._obstacles = Array(10).fill().map((e, i) => {
+        this._obstacles = Array(25).fill().map((e, i) => {
             const obstacle = new Obstacle();
-            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 16 + i), i % 2 == 0 ? 1 : -1);
+            obstacle.CreateSpinner(new THREE.Vector3(0, 0, i * this._obstacle_spacing + 16 + i), i % 2 == 0 ? 2 * Math.random() : -2 * Math.random());
 
             this._scene.add(obstacle.mesh);
 

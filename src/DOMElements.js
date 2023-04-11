@@ -3,6 +3,7 @@ export default Object.freeze({
         loadingScreen: document.querySelector('.loading-screen'),
         mainScreen: document.querySelector('.main-screen'),
         gameScreen: document.querySelector('.game-screen'),
+        gameStartScreen: document.querySelector('.game-start'),
         gameOverScreen: document.querySelector('.game-over'),
     },
     buttons: {
