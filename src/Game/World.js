@@ -158,6 +158,8 @@ class World {
     }
 
     CreateObstacles() {
+        this._obstacle_offset = 0;
+
         this._obstacles = Array(this._max_obstacles).fill().map((e, i) => {
             const obstacle = new Obstacle();
             obstacle.CreateSpinner(
@@ -173,6 +175,19 @@ class World {
 
             return obstacle;
         });
+    }
+
+    RemoveObstacle(index) {
+        this._obstacles[index].Dispose(this._physics.world, this._scene);
+        this._obstacles.splice(index, 1);
+    }
+
+    RemoveAllObstacles() {
+        for (let i = 0; i < this._obstacles.length; i++) {
+            this._obstacles[i].Dispose(this._physics.world, this._scene);
+        }
+
+        this._obstacles.splice(0, this._obstacles.length);
     }
 
     SetupContactPairResultCallback() {
@@ -224,8 +239,7 @@ class World {
                 this._obstacle_offset++;
 
                 /* Destroy past obstacle */
-                this._obstacles[i].Dispose(this._physics.world, this._scene);
-                this._obstacles.splice(i, 1);
+                this.RemoveObstacle(i);
             }
 
             this._obstacles[i].Update(e);

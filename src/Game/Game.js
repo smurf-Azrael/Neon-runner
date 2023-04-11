@@ -41,6 +41,8 @@ class Game {
     Restart() {
         if (!Game.has_lost) return;
         this._player_controller._kinematic_character_controller.Teleport(this._player_controller.spawn_position);
+        this._world.RemoveAllObstacles();
+        this._world.CreateObstacles();
         Game.has_lost = false;
         Game.is_paused = false;
         this._clock.start();
