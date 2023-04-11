@@ -16,7 +16,15 @@ body {
     color: #eee;
 }
 
+h2 {
+    text-shadow: 0 0 3px #fff,
+                0 0 5px #fff;
+    letter-spacing: 5px;
+}
+
 button {
+    outline: none;
+    border: none;
     cursor: pointer;
 }
 
@@ -32,7 +40,26 @@ button {
     justify-content: center;
     align-items: center;
     position: relative;
-    z-index: 2;
+    z-index: 11;
+}
+
+.buttons button {
+    width: 100%;
+    height: 75px;
+    margin: 1rem 0;
+    font-size: 2.25rem;
+    border: 2px solid #fff;
+    background: none;
+    color: #fff;
+    transition: all 0.5s;
+}
+
+.buttons button:hover {
+    border-color: var(--hover-color);
+    color: var(--hover-color);
+    text-shadow: 0 0 3px var(--hover-color);
+    box-shadow: 0 0 7px var(--hover-color);
+    transform: scale(1.025);
 }
 
 /******************/
@@ -78,38 +105,32 @@ button {
     width: 300px;
 }
 
-.buttons button {
-    width: 100%;
-    height: 75px;
-    margin: 1rem 0;
-    font-size: 2.25rem;
-    border: 2px solid #fff;
-    background: none;
-    color: #fff;
-    transition: all 0.5s;
-}
-
-.buttons button:hover {
-    border-color: var(--hover-color);
-    color: var(--hover-color);
-    text-shadow: 0 0 3px var(--hover-color);
-    box-shadow: 0 0 7px var(--hover-color);
-    transform: scale(1.025);
-}
-
+/***************/
+/* GAME SCREEN */
+/***************/
 .game-screen {
+    position: relative;
+    user-select: none;
+}
+
+.game-start {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1 !important;
-    user-select: none;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.game-start h2 {
+    font-size: 4rem;
 }
 
 .game-over {
     position: absolute;
-    background: rgba(0, 0, 0, 0.65);
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5);
     justify-content: space-between;
-    user-select: none;
 }
 
 .game-over h2 {
@@ -124,6 +145,9 @@ button {
     gap: 5rem;
 }
 
+/***************/
+/* CONSTRAINTS */
+/***************/
 @media (min-width: 760px) {
     .title { font-size: 4.5rem; }
     .game-over h2 { font-size: 6rem; }

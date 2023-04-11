@@ -40,8 +40,6 @@ class Game {
 
     Restart() {
         if (!Game.has_lost) return;
-        
-        DOMElements.screens.gameOverScreen.classList.add('hidden');
         this._player_controller._kinematic_character_controller.Teleport(this._player_controller.spawn_position);
         Game.has_lost = false;
         Game.is_paused = false;
