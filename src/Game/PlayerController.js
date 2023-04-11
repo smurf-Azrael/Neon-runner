@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import DOMElements from '../DOMElements.js';
 
 import CameraController from "./CameraController.js"
+import Game from './Game.js';
 import KinematicCharacterController from "./KinematicCharacterController.js"
 
 class PlayerController {
@@ -16,11 +16,13 @@ class PlayerController {
         }
         this._physics = physics;
 
+        this.spawn_position = new THREE.Vector3(0, 5, 0);
+
         this.player_mesh = new THREE.Mesh(
             new THREE.BoxGeometry(2, 2, 2),
             new THREE.MeshBasicMaterial({ color: 0x00ccff })
         );
-        this.player_mesh.position.set(0, 5, 0);
+        this.player_mesh.position.copy(this.spawn_position);
         
         this._camera_controller = new CameraController(this._camera);
         this._kinematic_character_controller = new KinematicCharacterController(this.player_mesh.position, this.player_mesh.quaternion);
@@ -28,7 +30,14 @@ class PlayerController {
         this._physics.world.addCollisionObject(this._kinematic_character_controller.body, 2, -1);
         this._physics.world.addAction(this._kinematic_character_controller.controller);
 
-        this._keys = {};
+        this._keys = {
+            KeyS: false,
+            KeyA: false,
+            KeyD: false,
+            KeyW: false,
+            Space: false,
+        };
+
         this._direction = new THREE.Vector3();
         this._tmp_vec = new Ammo.btTransform();
     
@@ -37,11 +46,22 @@ class PlayerController {
         document.addEventListener('touchstart', e => this.OnTapScreen(e));
     }
 
-    OnKeyDown(e) { this._keys[e.code] = true; }
+    OnKeyDown(e) {
+        if (e.code == 'KeyP') {
+            Game.TogglePause();
+            return;
+        }
+        
+        if (this._keys[e.code] != null) {
+            this._keys[e.code] = true;
+        }
+    }
 
     OnKeyUp(e) {
-        this._keys[e.code] = false;
-        this._kinematic_character_controller.controller.setWalkDirection(this._tmp_vec);
+        if (this._keys[e.code] != null) {
+            this._keys[e.code] = false;
+            this._kinematic_character_controller.controller.setWalkDirection(this._tmp_vec);
+        }
     }
 
     OnTapScreen(e) {
@@ -79,19 +99,19 @@ class PlayerController {
 
         /* Check if Player has Lost */
         if (pos.y() <= -40) {
-            DOMElements.screens.gameOverScreen.classList.remove('hidden');
-            document.exitPointerLock();
+            Game.Lose();
+            return;
         }
 
         /* Go Forward Only */
-        direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+        // direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
 
         if (document.pointerLockElement == document.body) {
             /* Free Roam Controls */
-            // if (this._keys["KeyW"]) direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            // if (this._keys["KeyS"]) direction.sub(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            // if (this._keys["KeyA"]) direction.sub(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            // if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            if (this._keys["KeyW"]) direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            if (this._keys["KeyS"]) direction.sub(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            if (this._keys["KeyA"]) direction.sub(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+            if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
             if (this._keys["Space"]) this._kinematic_character_controller.Jump();
         }
         
@@ -105,7 +125,7 @@ class PlayerController {
         this.player_mesh.position.copy(newPos3);
         this._camera.position.copy(newPos3);
         
-        // this._camera.position.set(newPos3.x, newPos3.y + 5, newPos3.z - 5);
+        // this._camera.position.set(newPos3.x, newPos3.y + 5, newPos3.z - 5); // Third person
 
         // Get Collisions
         // this._kinematic_character_controller.GetCollidingObjects().forEach(o => console.log(o.kB));
