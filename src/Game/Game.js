@@ -89,7 +89,7 @@ class Game {
 
         if (this._player_controller) {
             this._player_controller.Update(deltaT);
-            this._world.Update(deltaT, elapsedT, this._player_controller._kinematic_character_controller.body);
+            this._world.Update(deltaT, elapsedT, this._player_controller);
         }
         else {
             this._camera.instance.position.z += deltaT * 10.0;

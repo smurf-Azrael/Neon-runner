@@ -4,7 +4,6 @@ import Game from './Game/Game.js'
 import Loader from './Game/Loader.js'
 import './style.css'
 
-
 let GAME;
 
 new Loader().LoadAll(Assets.textures, res => {
@@ -16,10 +15,11 @@ new Loader().LoadAll(Assets.textures, res => {
             console.log(`Finished loading Ammo JS.`);
 
             DOMElements.screens.loadingScreen.classList.add('hidden');
-            DOMElements.screens.mainScreen.classList.remove('hidden');
 
-            // DOMElements.screens.gameScreen.classList.remove('hidden'); // DEV
-            // GAME = new Game(); GAME.InitializePlayerControls(); // DEV
+            // DOMElements.screens.mainScreen.classList.remove('hidden');
+
+            DOMElements.screens.gameScreen.classList.remove('hidden'); // DEV
+            GAME = new Game(); GAME.InitializePlayerControls(); // DEV
         })
         .catch(console.error);
 })
