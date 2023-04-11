@@ -46,11 +46,15 @@ class PlayerController {
         document.addEventListener('touchstart', e => this.OnTapScreen(e));
     }
 
+    get position() {
+        return this.player_mesh.position;
+    }
+
     OnKeyDown(e) {
-        if (e.code == 'KeyP') {
-            Game.TogglePause();
-            return;
-        }
+        // if (e.code == 'KeyP') {
+        //     Game.TogglePause();
+        //     return;
+        // }
         
         if (this._keys[e.code] != null) {
             this._keys[e.code] = true;
@@ -100,6 +104,7 @@ class PlayerController {
         /* Check if Player has Lost */
         if (pos.y() <= -40) {
             Game.Lose();
+            // this._kinematic_character_controller.Teleport(this.spawn_position);
             return;
         }
 

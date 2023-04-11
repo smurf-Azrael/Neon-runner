@@ -8,12 +8,12 @@ class Physics {
         this.world.setGravity(new Ammo.btVector3(0, -9.8, 0));
         this.world.getBroadphase().getOverlappingPairCache().setInternalGhostPairCallback(new Ammo.btGhostPairCallback());
 
-        const res = [];
-        Object.keys(Ammo).forEach(key => {
-            if (/^bt/.test(key) && /world/i.test(key)) res.push({key, value: Ammo[key]});
-        });
+        // const res = [];
+        // Object.keys(Ammo).forEach(key => {
+        //     if (/^bt/.test(key) && /world/i.test(key)) res.push({key, value: Ammo[key]});
+        // });
 
-        console.log(res);
+        // console.log(res);
     }
 
     Update(t) {

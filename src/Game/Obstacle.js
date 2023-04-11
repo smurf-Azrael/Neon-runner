@@ -24,6 +24,17 @@ class Obstacle {
         return { mesh: this.mesh, rigid_body: this.rigid_body };
     }
 
+    Dispose(physics_world, scene) {
+        this.mesh.geometry.dispose();
+        this.mesh.material.dispose();
+        scene.remove(this.mesh);
+
+        Ammo.destroy(this._quaternionBT);
+        // console.log(this.rigid_body.body);
+        physics_world.removeCollisionObject(this.rigid_body.body);
+        this.rigid_body.Destroy();
+    }
+
     Update(e) {
         this._quaternion3.setFromAxisAngle(new THREE.Vector3(0, 1, 0).normalize(), e * this.spin_dir);
         this._quaternionBT.setValue(this._quaternion3.x, this._quaternion3.y, this._quaternion3.z, this._quaternion3.w);
