@@ -30,9 +30,13 @@ class Game {
         this._InitializeCamera();
         this._InitializeRenderer();
 
+        
         this._clock = new THREE.Clock();
         this._physics = new Physics();
-        this._world = new World(this._physics, this._scene);
+
+        this.InitializePlayerControls();
+        
+        this._world = new World(this._physics, this._scene, this._player_controller);
 
         window.addEventListener('resize', () => this.Resize());
         window.requestAnimationFrame(() => this.Update());
@@ -41,8 +45,10 @@ class Game {
     Restart() {
         if (!Game.has_lost) return;
         this._player_controller._kinematic_character_controller.Teleport(this._player_controller.spawn_position);
-        this._world.RemoveAllObstacles();
-        this._world.CreateObstacles();
+        this._world._obstacles.Reset();
+        this._world._obstacles.Fill();
+        this._world.RemoveAllTriangles();
+        this._world.CreateTriangles();
         Game.has_lost = false;
         Game.is_paused = false;
         this._clock.start();
