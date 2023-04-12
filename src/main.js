@@ -19,7 +19,7 @@ new Loader().LoadAll(Assets.textures, res => {
             // DOMElements.screens.mainScreen.classList.remove('hidden');
 
             DOMElements.screens.gameScreen.classList.remove('hidden'); // DEV
-            GAME = new Game(); GAME.InitializePlayerControls(); // DEV
+            GAME = new Game(); // DEV
         })
         .catch(console.error);
 })
@@ -32,7 +32,6 @@ DOMElements.buttons.playButton.addEventListener('click', () => {
 
     if (!GAME) {
         GAME = new Game();
-        GAME.InitializePlayerControls();
     }
     else GAME.Restart();
 });

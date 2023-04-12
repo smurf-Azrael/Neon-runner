@@ -3,7 +3,7 @@ import { Line, Vector3 } from 'three';
 
 import Game from './Game.js';
 import RigidBody from './Rigidbody.js';
-import Obstacle from './Obstacle.js';
+import Obstacles from './Obstacle.js';
 
 const VERTEX_SHADER = `
 varying vec3 v_pos;
@@ -37,7 +37,7 @@ const BLUE_COLOR = new THREE.Color(0x11FFEE);
 const PINK_COLOR = new THREE.Color(0xFF10F0);
 
 class World {
-    constructor(physics, scene) {
+    constructor(physics, scene, playerController) {
         if (!physics) {
             console.warn('No physics specified!'); return;
         }
@@ -48,6 +48,11 @@ class World {
         }
         this._scene = scene;
 
+        if (!playerController) {
+            console.warn('No player controller specified!'); return;
+        }
+        this._player_controller = playerController;
+
         this._max_platforms = 10;
         this._max_boxes = 100;
         this._max_triangles = 50;
@@ -55,10 +60,6 @@ class World {
 
         this._triangle_offset = 0;
 
-        this._obstacle_spacing = 5;
-        this._obstacle_offset = 0;
-
-        this.SetupContactPairResultCallback();
         this.CreatePlatforms();
         this.CreateBoxes();
         this.CreateTriangles();
@@ -139,6 +140,7 @@ class World {
 
     CreateTriangles() {
         this._rotation = 0;
+        this._triangle_offset = 0;
         
         this._triangles = Array(this._max_triangles).fill().map((e, i) => {
             const points = [
@@ -163,53 +165,9 @@ class World {
     }
 
     CreateObstacles() {
-        this._obstacle_offset = 0;
-
-        this._obstacles = Array(this._max_obstacles).fill().map((e, i) => {
-            const obstacle = new Obstacle();
-            obstacle.CreateSpinner(
-                new THREE.Vector3(0, 0, i * this._obstacle_spacing + 16 + i),
-                i % 2 == 0 ? 2 * Math.random() : -2 * Math.random()
-            );
-
-            this._scene.add(obstacle.mesh);
-
-            this._physics.world.addRigidBody(obstacle.rigid_body.body);
-
-            this._obstacle_offset++;
-
-            return obstacle;
-        });
-    }
-
-    CreateNewObstacle() {
-        /* Create new obstacle */
-        const new_obstacle = new Obstacle();
-        new_obstacle.CreateSpinner(
-            new THREE.Vector3(0, 0, this._obstacle_offset * this._obstacle_spacing + 16 + this._obstacle_offset),
-            this._obstacle_offset % 2 == 0 ? 2 * Math.random() : -2 * Math.random()
-        );
-
-        /* Add it to the world */
-        this._scene.add(new_obstacle.mesh);
-        this._physics.world.addRigidBody(new_obstacle.rigid_body.body);
-
-        /* Add it to the list */
-        this._obstacles.push(new_obstacle);
-        this._obstacle_offset++;
-    }
-
-    RemoveObstacle(index) {
-        this._obstacles[index].Dispose(this._physics.world, this._scene);
-        this._obstacles.splice(index, 1);
-    }
-
-    RemoveAllObstacles() {
-        for (let i = 0; i < this._obstacles.length; i++) {
-            this._obstacles[i].Dispose(this._physics.world, this._scene);
-        }
-
-        this._obstacles.splice(0, this._obstacles.length);
+        this._obstacles = new Obstacles({ size: 25, physics: this._physics, scene: this._scene, playerController: this._player_controller });
+        this._obstacles.Reset();
+        this._obstacles.Fill();
     }
 
     CreateNewTriangle() {
@@ -249,68 +207,21 @@ class World {
 
         this._triangles.splice(0, this._triangles.length);
     }
-    
-    SetupContactPairResultCallback() {
-        this.cb_contact_pair_result = new Ammo.ConcreteContactResultCallback();
-        this.cb_contact_pair_result.hasContact = false;
-        this.cb_contact_pair_result.addSingleResult = function(cp, colObj0Wrap, partId0, index0, colObj1Wrap, partId1, index1) {
-            const contact_point = Ammo.wrapPointer(cp, Ammo.btManifoldPoint);
-            
-            if (contact_point.getDistance() > 0.05) return;
 
-            this.hasContact = true;
-        }
-    }
-
-    CheckCollision(body1, body2) {
-        this.cb_contact_pair_result.hasContact = false;
-        this._physics.world.contactPairTest(body1, body2, this.cb_contact_pair_result);
-
-        return this.cb_contact_pair_result.hasContact;
-    }
-
-    Update(t, e, character_controller) {
+    Update(t, e) {
         /* Rotate boxes */
         for (let i = 0; i < this._boxes.length; i++) {
             this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
             this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
         }
 
-        /* First three matches to check for collisions */
-        const matches = [];
-
-        for (let i = 0; i < this._obstacles.length; i++) {
-            this._obstacles[i].mesh.material.color.setHex(0x00ff00); /* Visualizing */
-
-            if ( /* Player is behind the obstacle */
-                character_controller &&
-                character_controller.position.z < this._obstacles[i].mesh.position.z + 10
-            ) {
-                if (matches.length < 3) matches.push(this._obstacles[i]); /* Get the first three matches */
-            } else { /* Player is in front of the obstacle */
-                this.CreateNewObstacle();
-                this.RemoveObstacle(i);
-            }
-
-            this._obstacles[i].Update(e);
-        }
-
-        /* Check for collision on the first three matches */
-        for (let i = 0; i < matches.length; i++) {
-            if (character_controller) {
-                if (this.CheckCollision(character_controller._kinematic_character_controller.body, matches[i].rigid_body.body)) {
-                    Game.Lose();
-                    return;
-                }
-            }
-            matches[i].mesh.material.color.setHex(0xff0000); /* Visualizing  */
-        }
+        this._obstacles.Update(t, e);
 
         /* Procedurally generate triangles */
         for (let i = 0; i < this._triangles.length; i++) {
             if (
-                character_controller &&
-                character_controller.position.z > this._triangles[i].geometry.attributes.position.array[2] + 10
+                this._player_controller &&
+                this._player_controller.position.z > this._triangles[i].geometry.attributes.position.array[2] + 10
             ) {
                 this.CreateNewTriangle();
                 this.RemoveTriangle(i);
