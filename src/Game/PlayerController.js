@@ -103,8 +103,8 @@ class PlayerController {
 
         /* Check if Player has Lost */
         if (pos.y() <= -40) {
-            Game.Lose();
-            // this._kinematic_character_controller.Teleport(this.spawn_position);
+            // Game.Lose();
+            this._kinematic_character_controller.Teleport(this.spawn_position);
             return;
         }
 

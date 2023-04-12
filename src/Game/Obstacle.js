@@ -25,9 +25,9 @@ class Obstacle {
     }
 
     Dispose(physics_world, scene) {
+        scene.remove(this.mesh);
         this.mesh.geometry.dispose();
         this.mesh.material.dispose();
-        scene.remove(this.mesh);
 
         Ammo.destroy(this._quaternionBT);
         physics_world.removeCollisionObject(this.rigid_body.body);

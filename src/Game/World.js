@@ -51,7 +51,9 @@ class World {
         this._max_platforms = 10;
         this._max_boxes = 100;
         this._max_triangles = 50;
-        this._max_obstacles = 20;
+        this._max_obstacles = 50;
+
+        this._triangle_offset = 0;
 
         this._obstacle_spacing = 5;
         this._obstacle_offset = 0;
@@ -153,7 +155,10 @@ class World {
 
             this._scene.add(mesh);
 
-            this._rotation += 1;
+            this._rotation++;
+            this._triangle_offset++;
+
+            return mesh;
         });
     }
 
@@ -177,6 +182,23 @@ class World {
         });
     }
 
+    CreateNewObstacle() {
+        /* Create new obstacle */
+        const new_obstacle = new Obstacle();
+        new_obstacle.CreateSpinner(
+            new THREE.Vector3(0, 0, this._obstacle_offset * this._obstacle_spacing + 16 + this._obstacle_offset),
+            this._obstacle_offset % 2 == 0 ? 2 * Math.random() : -2 * Math.random()
+        );
+
+        /* Add it to the world */
+        this._scene.add(new_obstacle.mesh);
+        this._physics.world.addRigidBody(new_obstacle.rigid_body.body);
+
+        /* Add it to the list */
+        this._obstacles.push(new_obstacle);
+        this._obstacle_offset++;
+    }
+
     RemoveObstacle(index) {
         this._obstacles[index].Dispose(this._physics.world, this._scene);
         this._obstacles.splice(index, 1);
@@ -190,6 +212,44 @@ class World {
         this._obstacles.splice(0, this._obstacles.length);
     }
 
+    CreateNewTriangle() {
+        const points = [
+            new THREE.Vector3(-50, -50, this._triangle_offset * 25).multiplyScalar(1),
+            new THREE.Vector3(0, 50, this._triangle_offset * 25).multiplyScalar(1),
+            new THREE.Vector3(50, -50, this._triangle_offset * 25)
+        ];
+
+        const mesh = new Line(
+            new THREE.BufferGeometry().setFromPoints(points),
+            new THREE.LineBasicMaterial({ color: this._triangle_offset % 2 == 0 ? BLUE_COLOR : PINK_COLOR })
+        );
+        mesh.rotation.z = this._rotation;
+
+        this._scene.add(mesh);
+
+        this._rotation++;
+        this._triangle_offset++;
+
+        this._triangles.push(mesh);
+    }
+
+    RemoveTriangle(index) {
+        this._triangles[index].geometry.dispose();
+        this._triangles[index].material.dispose();
+        this._scene.remove(this._triangles[index]);
+        this._triangles.splice(index, 1);
+    }
+
+    RemoveAllTriangles() {
+        for (let i = 0; i < this._triangles.length; i++) {
+            this._scene.remove(this._triangles[i]);
+            this._triangles[i].geometry.dispose();
+            this._triangles[i].material.dispose();
+        }
+
+        this._triangles.splice(0, this._triangles.length);
+    }
+    
     SetupContactPairResultCallback() {
         this.cb_contact_pair_result = new Ammo.ConcreteContactResultCallback();
         this.cb_contact_pair_result.hasContact = false;
@@ -210,41 +270,32 @@ class World {
     }
 
     Update(t, e, character_controller) {
+        /* Rotate boxes */
         for (let i = 0; i < this._boxes.length; i++) {
             this._boxes[i].mesh.rotation.x += t * this._boxes[i].rotation.x_rotation_speed * 0.25;
             this._boxes[i].mesh.rotation.y += t * this._boxes[i].rotation.y_rotation_speed * 0.25;
         }
 
+        /* First three matches to check for collisions */
         const matches = [];
 
         for (let i = 0; i < this._obstacles.length; i++) {
-            this._obstacles[i].mesh.material.color.setHex(0x00ff00);
-            if (
+            this._obstacles[i].mesh.material.color.setHex(0x00ff00); /* Visualizing */
+
+            if ( /* Player is behind the obstacle */
                 character_controller &&
                 character_controller.position.z < this._obstacles[i].mesh.position.z + 10
             ) {
-                if (matches.length < 3) matches.push(this._obstacles[i]);
-            } else {
-                /* Create a new obstacle */
-                const new_obstacle = new Obstacle();
-                new_obstacle.CreateSpinner(
-                    new THREE.Vector3(0, 0, this._obstacle_offset * this._obstacle_spacing + 16 + this._obstacle_offset),
-                    this._obstacle_offset % 2 == 0 ? 2 * Math.random() : -2 * Math.random()
-                );
-
-                this._scene.add(new_obstacle.mesh);
-                this._physics.world.addRigidBody(new_obstacle.rigid_body.body);
-
-                this._obstacles.push(new_obstacle);
-                this._obstacle_offset++;
-
-                /* Destroy past obstacle */
+                if (matches.length < 3) matches.push(this._obstacles[i]); /* Get the first three matches */
+            } else { /* Player is in front of the obstacle */
+                this.CreateNewObstacle();
                 this.RemoveObstacle(i);
             }
 
             this._obstacles[i].Update(e);
         }
 
+        /* Check for collision on the first three matches */
         for (let i = 0; i < matches.length; i++) {
             if (character_controller) {
                 if (this.CheckCollision(character_controller._kinematic_character_controller.body, matches[i].rigid_body.body)) {
@@ -252,7 +303,18 @@ class World {
                     return;
                 }
             }
-            matches[i].mesh.material.color.setHex(0xff0000);
+            matches[i].mesh.material.color.setHex(0xff0000); /* Visualizing  */
+        }
+
+        /* Procedurally generate triangles */
+        for (let i = 0; i < this._triangles.length; i++) {
+            if (
+                character_controller &&
+                character_controller.position.z > this._triangles[i].geometry.attributes.position.array[2] + 10
+            ) {
+                this.CreateNewTriangle();
+                this.RemoveTriangle(i);
+            }
         }
     }
 }
