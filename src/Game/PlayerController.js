@@ -109,20 +109,23 @@ class PlayerController {
         }
 
         /* Go Forward Only */
-        // direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+        if (Game.has_started) {
+            direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
 
-        if (document.pointerLockElement == document.body) {
-            /* Free Roam Controls */
-            if (this._keys["KeyW"]) direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["KeyS"]) direction.sub(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["KeyA"]) direction.sub(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
-            if (this._keys["Space"]) this._kinematic_character_controller.Jump();
+            if (document.pointerLockElement == document.body) {
+                /* Free Roam Controls */
+                // if (this._keys["KeyW"]) direction.add(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+                // if (this._keys["KeyS"]) direction.sub(this.GetForwardVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+                // if (this._keys["KeyA"]) direction.sub(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+                // if (this._keys["KeyD"]) direction.add(this.GetSideVector().multiplyScalar(t * this._kinematic_character_controller.player_speed));
+                if (this._keys["Space"]) this._kinematic_character_controller.Jump();
+            }
+            
+            /* Move Player in Direction and Get New Transform */
         }
         
-        /* Move Player in Direction and Get New Transform */
         const newTransform = this._kinematic_character_controller.Move(direction);
-
+        
         /* Update Camera and Player Position */
         const newPos = newTransform.getOrigin();
         const newPos3 = new THREE.Vector3(newPos.x(), newPos.y(), newPos.z());

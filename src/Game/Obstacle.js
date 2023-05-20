@@ -3,8 +3,14 @@ import RigidBody from "./Rigidbody.js"
 import Game from './Game.js';
 
 class Obstacle {
-    constructor(params) {}
+    constructor(params) {
+        this.mesh;
+        this.rigid_body;
+        this.margin = 0;
+    }
+
     Dispose() {}
+
     Update() {}
 }
 
@@ -14,13 +20,11 @@ class Spinner extends Obstacle {
 
         this.position = params.position ? params.position : new THREE.Vector3(0, 0, 0);
         this.spin_dir = params.spinDir ?? 1;
-        this.size = params.size ? params.size : new THREE.Vector3(15, 0.1, 0.1);
+        this.size = new THREE.Vector3(15, 0.15, 0.15);
         this.margin = 10;
 
-        this.mesh;
         this._quaternion_3;
         this._quaternion_bt;
-        this.rigid_body;
 
         this.Initialize();
     }
@@ -30,7 +34,11 @@ class Spinner extends Obstacle {
             new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z),
             new THREE.MeshBasicMaterial({ color: 0xff0000 })
         );
-        this.mesh.position.copy(this.position);
+        this.mesh.position.set(
+            this.position.x,
+            this.position.y + this.size.y * 0.5,
+            this.position.z
+        );
 
         this._quaternion_3 = this.mesh.quaternion;
         this._quaternion_bt = new Ammo.btQuaternion();
@@ -71,6 +79,47 @@ class Spinner extends Obstacle {
     }
 }
 
+class Test extends Obstacle {
+    constructor(params) {
+        super(params);
+
+        this.position = params.position ? params.position : new THREE.Vector3(0, 0, 0);
+        this.size = new THREE.Vector3(10, 1, 0.1);
+        this.margin = 5;
+    
+        this.Initialize();
+    }
+
+    Initialize() {
+        this.mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(this.size.x, this.size.y, this.size.z),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        );
+        this.mesh.position.set(
+            this.position.x,
+            this.position.y + this.size.y * 0.5,
+            this.position.z
+        );
+
+        this.rigid_body = new RigidBody();
+        this.rigid_body.CreateBox(0, this.mesh.position, this.mesh.quaternion, this.size);
+    }
+
+    Dispose(physics_world, scene) {
+        if (!scene) return;
+        if (!physics_world) return;
+
+        scene.remove(this.mesh);
+        this.mesh.geometry.dispose();
+        this.mesh.material.dispose();
+
+        physics_world.removeRigidBody(this.rigid_body.body);
+        this.rigid_body.Destroy();
+    }
+
+    Update(e) {}
+}
+
 class Obstacles {
     constructor({ spacing, size, physics, scene, playerController }) {
         this.list = [];
@@ -81,7 +130,7 @@ class Obstacles {
         this._physics = physics;
         this._scene = scene;
         this._player_controller = playerController;
-        this._types = [Spinner];
+        this._types = [Spinner, Test];
 
         this.SetupContactPairResultCallback();
     }

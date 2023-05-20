@@ -1,5 +1,6 @@
-import Sizes from "./utils/Sizes.js";
 import DOMElements from "../DOMElements.js";
+import Game from "./Game.js";
+import Sizes from "./utils/Sizes.js";
 
 class CameraController {
     constructor(camera) {
@@ -60,6 +61,7 @@ class CameraController {
     OnMouseDown() {
         document.body.requestPointerLock();
         DOMElements.screens.gameStartScreen.classList.add('hidden');
+        Game.has_started = true;
     } 
 
     OnMouseMove(e) {
