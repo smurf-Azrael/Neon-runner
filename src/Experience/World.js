@@ -1,7 +1,6 @@
-import * as THREE from 'three'
-import { Line, Vector3 } from 'three';
+import * as THREE from 'three';
 
-import Game from './Game.js';
+import Assets from '../utils/Assets';
 import RigidBody from './Rigidbody.js';
 import Obstacles from './Obstacle.js';
 
@@ -60,10 +59,35 @@ class World {
 
         this._triangle_offset = 0;
 
+        this.CreateGrid(new THREE.Vector3(0, -5, 0), Math.PI / 2, 0);
+        this.CreateGrid(new THREE.Vector3(0, 15, 0), Math.PI / 2, 0);
+        this.CreateGrid(new THREE.Vector3(25, 7.5, 0), 0, Math.PI / 2);
+        this.CreateGrid(new THREE.Vector3(-25, 7.5, 0), 0, Math.PI / 2);
+
         this.CreatePlatforms();
         this.CreateBoxes();
         this.CreateTriangles();
         this.CreateObstacles();
+    }
+
+
+    CreateGrid(position, rotX, rotY) {
+        const diffuse = Assets['grid_texture'].data;
+        diffuse.wrapS = THREE.RepeatWrapping;
+        diffuse.wrapT = THREE.RepeatWrapping;
+        diffuse.anisotropy = 4;
+        diffuse.repeat.set(980, 980);
+        diffuse.offset.set(0, 0);
+
+        const grid = new THREE.Mesh(
+            new THREE.PlaneGeometry(1000, 1000),
+            new THREE.MeshBasicMaterial({ color: 0xFFFFFF, opacity: 0.15, map: diffuse, alphaMap: diffuse, transparent: true, side: THREE.DoubleSide })
+        );
+        grid.position.copy(position);
+        grid.rotation.x -= rotX;
+        grid.rotation.y -= rotY;
+
+        this._scene.add(grid);
     }
 
     CreateStaticBody(size, pos = new THREE.Vector3(), quat = new THREE.Quaternion(), uniforms) {
@@ -111,7 +135,7 @@ class World {
 
     CreateBoxes() {
         this._boxes = Array(this._max_boxes).fill().map((e, i) => {
-            const v = new Vector3(
+            const v = new THREE.Vector3(
                 (Math.random() * 2 - 1) * 30,
                 Math.random() * 50 - 12.75,
                 (Math.random() * 2 - 1) * 100 + 100
@@ -149,7 +173,7 @@ class World {
                 new THREE.Vector3(50, -50, i * 25)
             ];
 
-            const mesh = new Line(
+            const mesh = new THREE.Line(
                 new THREE.BufferGeometry().setFromPoints(points),
                 new THREE.LineBasicMaterial({ color: i % 2 == 0 ? BLUE_COLOR : PINK_COLOR })
             );
@@ -177,7 +201,7 @@ class World {
             new THREE.Vector3(50, -50, this._triangle_offset * 25)
         ];
 
-        const mesh = new Line(
+        const mesh = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints(points),
             new THREE.LineBasicMaterial({ color: this._triangle_offset % 2 == 0 ? BLUE_COLOR : PINK_COLOR })
         );

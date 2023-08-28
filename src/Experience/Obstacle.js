@@ -1,12 +1,14 @@
 import * as THREE from 'three'
 import RigidBody from "./Rigidbody.js"
-import Game from './Game.js';
+import Game from './Experience.js';
 
 class Obstacle {
-    constructor(params) {
+    constructor() {
         this.mesh;
+        this.position;
         this.rigid_body;
         this.margin = 0;
+        this.size;
     }
 
     Dispose() {}
@@ -123,14 +125,22 @@ class Test extends Obstacle {
 class Obstacles {
     constructor({ spacing, size, physics, scene, playerController }) {
         this.list = [];
-        this._spacing = spacing ?? 10;
-        this._offset = 0;
-        this._max = size ?? 5;
+        this.spacing = spacing ?? 10;
+        this.offset = 0;
+        this.MAX = size ?? 5;
+        this.TYPES = [Spinner, Test];
 
-        this._physics = physics;
-        this._scene = scene;
-        this._player_controller = playerController;
-        this._types = [Spinner, Test];
+        if (!physics) {
+            console.warn('No physics specified!');
+        } this.PHYSICS = physics;
+
+        if (!scene) {
+            console.warn('No scene specified!');
+        } this.SCENE = scene;
+
+        if (!playerController) {
+            console.warn('No playerController specified!');
+        } this.PLAYER_CONTROLLER = playerController;
 
         this.SetupContactPairResultCallback();
     }
@@ -138,32 +148,32 @@ class Obstacles {
     CreateObstacle(params) {
         if (this.IsFull()) return;
 
-        const Obstacle_Type = this._types[Math.floor(Math.random() * this._types.length)];
+        const Obstacle_Type = this.TYPES[Math.floor(Math.random() * this.TYPES.length)];
 
         const instance = new Obstacle_Type(params);
         this.list.push(instance);
 
-        this._scene.add(instance.mesh);
-        this._physics.world.addRigidBody(instance.rigid_body.body);
+        this.SCENE.add(instance.mesh);
+        this.PHYSICS.world.addRigidBody(instance.rigid_body.body);
         
-        this._offset++;
+        this.offset++;
 
         return instance;
     }
 
     RemoveObstacle(i) {
         if (this.IsEmpty()) return;
-        this.list[i].Dispose(this._physics.world, this._scene);
+        this.list[i].Dispose(this.PHYSICS.world, this.SCENE);
         this.list.splice(i, 1);
     }
 
     Fill() {
         if (this.IsFull()) return;
 
-        for (let i = this.list.length; i < this._max; i++) {
+        for (let i = this.list.length; i < this.MAX; i++) {
             this.CreateObstacle({
-                position: new THREE.Vector3(0, 0, this._offset * this._spacing + 16 + this._offset),
-                spinDir: (this._offset % 2 == 0 ? 2 : -2) * Math.random()
+                position: new THREE.Vector3(0, 0, this.offset * this.spacing + 16 + this.offset),
+                spinDir: (this.offset % 2 == 0 ? 2 : -2) * Math.random()
             });
         }
     }
@@ -171,10 +181,10 @@ class Obstacles {
     Reset() {
         if (this.IsEmpty()) return;
 
-        this._offset = 0;
+        this.offset = 0;
 
         for (let i = 0; i < this.list.length; i++) {
-            this.list[i].Dispose(this._physics.world, this._scene);
+            this.list[i].Dispose(this.PHYSICS.world, this.SCENE);
         }
 
         this.list.splice(0, this.list.length);
@@ -194,13 +204,13 @@ class Obstacles {
 
     CheckCollision(body1, body2) {
         this._cb_contact_pair_result.hasContact = false;
-        this._physics.world.contactPairTest(body1, body2, this._cb_contact_pair_result);
+        this.PHYSICS.world.contactPairTest(body1, body2, this._cb_contact_pair_result);
 
         return this._cb_contact_pair_result.hasContact;
     }
 
     IsEmpty() { return this.list.length === 0; }
-    IsFull() { return this.list.length > this._max; }
+    IsFull() { return this.list.length > this.MAX; }
 
     Update(d, e) {
         const matches = [];
@@ -209,14 +219,14 @@ class Obstacles {
             this.list[i].Update(e);
 
             if (
-                this._player_controller &&
-                this._player_controller.position.z < this.list[i].mesh.position.z + this.list[i].margin
+                this.PLAYER_CONTROLLER &&
+                this.PLAYER_CONTROLLER.position.z < this.list[i].mesh.position.z + this.list[i].margin
             ) {
                 if (matches.length < 3) matches.push(this.list[i]);
             } else {
                 this.CreateObstacle({
-                    position: new THREE.Vector3(0, 0, this._offset * this._spacing + 16 + this._offset),
-                    spinDir: (this._offset % 2 == 0 ? 2 : -2) * Math.random()
+                    position: new THREE.Vector3(0, 0, this.offset * this.spacing + 16 + this.offset),
+                    spinDir: (this.offset % 2 == 0 ? 2 : -2) * Math.random()
                 });
                 this.RemoveObstacle(i);
                 continue;
@@ -224,8 +234,8 @@ class Obstacles {
         }
 
         for (let i = 0; i < matches.length; i++) {
-            if (this.CheckCollision(this._player_controller._kinematic_character_controller.body, matches[i].rigid_body.body)) {
-                Game.Lose();
+            if (this.CheckCollision(this.PLAYER_CONTROLLER.KINEMATIC_CHARACTER_CONTROLLER.body, matches[i].rigid_body.body)) {
+                alert('Lose');
                 return;
             }
             // matches[i].mesh.material.color.setHex(0xff0000);
