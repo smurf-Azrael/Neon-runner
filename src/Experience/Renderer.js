@@ -4,19 +4,17 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
-import Sizes from './utils/Sizes.js'
+import Sizes from '../utils/Sizes.js'
 
 class Renderer {
     constructor(scene, camera) {
         if (!scene) {
             console.warn('No scene specified!'); return;
-        }
-        this._scene = scene;
+        } this._scene = scene;
 
         if (!camera) {
             console.warn('No camera specified!'); return;
-        }
-        this._camera = camera;
+        } this._camera = camera;
 
         this.sizes = new Sizes();
 
@@ -25,6 +23,7 @@ class Renderer {
         this.instance.setSize(this.sizes.width, this.sizes.height);
         this.instance.outputEncoding = THREE.sRGBEncoding;
         this.instance.toneMapping = THREE.NoToneMapping;
+        
         this.sizes.dom_element.appendChild(this.instance.domElement);
     }
 

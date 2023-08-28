@@ -11,35 +11,8 @@
   <script src="https://cdn.jsdelivr.net/gh/kripken/ammo.js@HEAD/builds/ammo.wasm.js"></script>
 </head>
 
-<body class="text-white">
-  <div class="absolute bg-primary w-screen h-screen flex justify-center items-center flex-col space-y-6"
-    id="loading-screen">
-    <h2 class="text-7xl">Loading...</h2>
-    <div class="w-32 h-32 border-4 border-lightGray border-t-white rounded-full animate-spin"></div>
-  </div>
-
-  <div class="hidden bg-primary h-screen flex flex-col justify-evenly" id="main-screen">
-    <h2 class="text-center text-8xl py-5">Neon Runner 2</h2>
-    <div class="flex flex-col items-center">
-      <button class="btn" id="play" tabindex="-1">Play</button>
-      <button class="btn" id="options" tabindex="-1">Options</button>
-    </div>
-  </div>
-
-  <div class="hidden h-screen" id="game-screen">
-    <div
-      class="hidden absolute top-0 left-0 w-screen h-screen bg-primary bg-opacity-50 flex justify-center items-center cursor-pointer"
-      id="game-start">
-      <h2 class="text-6xl font-bold tracking-wider">Click to Start</h2>
-    </div>
-    <div class="hidden absolute top-0 left-0 w-screen h-screen bg-primary bg-opacity-50 flex flex-col justify-evenly items-center" id="game-over">
-      <h2 class="text-8xl">Game Over</h2>
-      <div>
-        <button class="btn" id="retry" tabindex="-1">Retry</button>
-        <button class="btn" id="exit" tabindex="-1">Exit</button>
-      </div>
-    </div>
-  </div>
+<body>
+  <div class="w-screen h-screen" id="canvas-container"></div>
 
   <script type="module" src="./src/main.js"></script>
 </body>

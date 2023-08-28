@@ -1,5 +1,7 @@
+import * as THREE from 'three';
+
 // import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-// import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 class Loader {
     static instance;
@@ -36,14 +38,13 @@ class Loader {
         });
     }
 
-    LoadAll(items, cb) {
+    LoadAll(items) {
         if (!Array.isArray(items)) {
             console.error('Items list must be of type Array!');
             return;
         }
         
-        Promise.all(items.map(item => this.Load(item.path)))
-            .then(cb).catch(console.error);
+        return Promise.all(items.map(item => this.Load(item.path).then(res => item.data = res)));
     }
 }
 
